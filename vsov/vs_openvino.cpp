@@ -1,5 +1,6 @@
 #include <array>
 #include <cstdint>
+#include <cctype>
 #include <memory>
 #include <optional>
 #include <sstream>
@@ -553,6 +554,21 @@ static void VS_CC vsOvCreate(
         return set_error("proto serialization failed");
     }
 
+    auto toupper = [](const char * key) -> std::string {
+        std::string ret(key);
+        for (auto & c : ret) {
+            c = std::toupper(c);
+        }
+        return ret;
+    };
+
+    for (const auto key : { "cpu_bind_thread", "cpu_throughput_streams", "cpu_thread_num" }) {
+        const char * data = vsapi->propGetData(in, key, 0, &error);
+        if (!error) {
+            d->core.SetConfig({{ toupper(key), data }});
+        }
+    }
+
     {
         InferenceEngine::CNNNetwork network;
         try {
@@ -635,6 +651,9 @@ VS_EXTERNAL_API(void) VapourSynthPluginInit(
 #ifdef ENABLE_VISUALIZATION
         "dot_path:data:opt;"
 #endif
+        "cpu_bind_thread:data:opt;"
+        "cpu_throughput_streams:data:opt;"
+        "cpu_thread_num:data:opt;"
         , vsOvCreate,
         nullptr,
         plugin
@@ -660,3 +679,4 @@ VS_EXTERNAL_API(void) VapourSynthPluginInit(
     };
     registerFunc("Version", "", getVersion, nullptr, plugin);
 }
+
