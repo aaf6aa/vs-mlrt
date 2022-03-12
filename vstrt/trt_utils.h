@@ -366,10 +366,6 @@ std::optional<ErrorMessage> checkEngine(
             return "network binding " + std::to_string(i) + " should reside on device";
         }
 
-        if (engine->getBindingDataType(i) != nvinfer1::DataType::kFLOAT) {
-            return "expects network IO with type fp32";
-        }
-
         if (engine->getBindingFormat(i) != nvinfer1::TensorFormat::kLINEAR) {
             return "expects network IO with layout NCHW (row major linear)";
         }
